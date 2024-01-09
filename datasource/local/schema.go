@@ -38,25 +38,24 @@ import (
 	"sync"
 )
 
-var MutexMap = make(map[string]*sync.Mutex)
+var MutexMap = make(map[string]*sync.RWMutex)
 var mutexMapLock = &sync.Mutex{}
 var rollbackMutexLock = &sync.Mutex{}
 var createDirMutexLock = &sync.Mutex{}
 
 func init() {
-	schema.Install("local_with_embeded_etcd", NewSchemaDAO)
-	schema.Install("local_with_embedded_etcd", NewSchemaDAO)
+	schema.Install("local", NewSchemaDAO)
 }
 
 func NewSchemaDAO(opts schema.Options) (schema.DAO, error) {
 	return &SchemaDAO{}, nil
 }
 
-func GetOrCreateMutex(path string) *sync.Mutex {
+func GetOrCreateMutex(path string) *sync.RWMutex {
 	mutexMapLock.Lock()
 	mutex, ok := MutexMap[path]
 	if !ok {
-		mutex = &sync.Mutex{}
+		mutex = &sync.RWMutex{}
 		MutexMap[path] = mutex
 	}
 	mutexMapLock.Unlock()
@@ -244,8 +243,8 @@ func CleanDir(dir string) error {
 
 func ReadFile(filepath string) ([]byte, error) {
 	mutex := GetOrCreateMutex(filepath)
-	mutex.Lock()
-	defer mutex.Unlock()
+	mutex.RLock()
+	defer mutex.RUnlock()
 
 	// check the file is empty
 	content, err := os.ReadFile(filepath)

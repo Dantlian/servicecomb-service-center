@@ -47,7 +47,7 @@ func Init(opts Options) error {
 	}
 	kind := opts.Kind
 	if strings.Trim(config.GetRegistry().SchemaRootPath, " ") != "" {
-		kind = "local_with_embeded_etcd"
+		kind = "local"
 		StorageType = "local"
 		RootFilePath = config.GetRegistry().SchemaRootPath
 	}

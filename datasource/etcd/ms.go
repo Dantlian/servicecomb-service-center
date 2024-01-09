@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apache/servicecomb-service-center/datasource/local"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -1505,6 +1506,10 @@ func (ds *MetadataManager) UnregisterService(ctx context.Context, request *pb.De
 				rollbackErr = local.CleanDir(tmpPath)
 				if rollbackErr != nil {
 					log.Error("clean tmp dir error when rollback in UnregisterService", err)
+				}
+				rollbackErr = os.Remove(originPath)
+				if rollbackErr != nil {
+					log.Error("clean origin dir error when rollback in UnregisterService", err)
 				}
 			}
 		}
